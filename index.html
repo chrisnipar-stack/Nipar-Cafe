@@ -101,8 +101,14 @@
     display:flex;
     gap:8px;
     overflow-x:auto;
-    padding:20px 18px 6px;
+    padding:14px 18px;
     scrollbar-width:none;
+    position:sticky;
+    top:env(safe-area-inset-top,0px);
+    z-index:50;
+    background:var(--cream);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 6px 12px -8px rgba(60,32,10,0.25);
   }
   .cat-nav::-webkit-scrollbar{display:none;}
   .cat-nav a{
@@ -116,6 +122,12 @@
     border-radius:999px;
     text-decoration:none;
     white-space:nowrap;
+    transition:background .15s,color .15s;
+  }
+  .cat-nav a.active{
+    background:var(--rust);
+    color:#fff;
+    border-color:var(--rust);
   }
 
   .container{padding:6px 18px 0;}
@@ -132,7 +144,7 @@
     display:flex;
     align-items:baseline;
     justify-content:space-between;
-    scroll-margin-top:14px;
+    scroll-margin-top:64px;
   }
   .category-title span.count{
     font-family:'Work Sans',sans-serif;
@@ -357,6 +369,7 @@ menuData.forEach(cat => {
   const navLink = document.createElement('a');
   navLink.href = '#'+id;
   navLink.textContent = cat.kategori;
+  navLink.dataset.target = id;
   nav.appendChild(navLink);
 
   const title = document.createElement('div');
@@ -392,6 +405,22 @@ menuData.forEach(cat => {
   });
   container.appendChild(list);
 });
+
+const navLinks = Array.from(nav.querySelectorAll('a'));
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const link = nav.querySelector(`a[data-target="${entry.target.id}"]`);
+      if(link){
+        link.classList.add('active');
+        link.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+      }
+    }
+  });
+}, { rootMargin: '-90px 0px -70% 0px' });
+
+document.querySelectorAll('.category-title').forEach(el=>observer.observe(el));
 
 function hitungTotal(){
   let total = 0;
